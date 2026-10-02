@@ -1,0 +1,9 @@
+{
+    "dataset_rows": 500000,
+    "invalid_ages": 0,
+    "invalid_credit_scores": 0,
+    "invalid_transaction_amounts": 0,
+    "invalid_emails": 29765,
+    "invalid_phones": 29766,
+    "data_health_score": 97.62
+}
