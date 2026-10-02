@@ -1,0 +1,7 @@
+{
+    "duplicates_removed": 5000,
+    "age_missing_filled": 25000,
+    "credit_score_missing_filled": 25000,
+    "invalid_emails_found": 29765,
+    "invalid_phones_found": 5000
+}
