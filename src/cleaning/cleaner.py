@@ -1,14 +1,19 @@
 import pandas as pd
 import json
+import os
 
+from sklearn.impute import KNNImputer
 
 # Load dataset
+
 df = pd.read_csv(
     "data/raw/banking_transactions_505k.csv"
 )
 
 print("Original Shape:")
 print(df.shape)
+
+# Remove Duplicates
 
 duplicates_before = df.duplicated().sum()
 
@@ -22,25 +27,52 @@ print(duplicates_removed)
 print("\nNew Shape:")
 print(df.shape)
 
-# Fill missing age values
+# KNN Imputation
 
-age_missing_before = df["age"].isnull().sum()
-
-df["age"] = df["age"].fillna(
-    df["age"].median()
+age_missing_before = (
+    df["age"]
+    .isnull()
+    .sum()
 )
 
-age_missing_after = df["age"].isnull().sum()
-
-# Fill missing credit score values
-
-credit_missing_before = df["credit_score"].isnull().sum()
-
-df["credit_score"] = df["credit_score"].fillna(
-    df["credit_score"].median()
+credit_missing_before = (
+    df["credit_score"]
+    .isnull()
+    .sum()
 )
 
-credit_missing_after = df["credit_score"].isnull().sum()
+print("\nStarting KNN Imputation...")
+
+numeric_cols = [
+    "age",
+    "credit_score"
+]
+
+imputer = KNNImputer(
+    n_neighbors=5
+)
+
+print("Applying KNN Imputation...")
+
+df[numeric_cols] = (
+    imputer.fit_transform(
+        df[numeric_cols]
+    )
+)
+
+print("KNN Imputation Complete!")
+
+age_missing_after = (
+    df["age"]
+    .isnull()
+    .sum()
+)
+
+credit_missing_after = (
+    df["credit_score"]
+    .isnull()
+    .sum()
+)
 
 print("\nAge Missing Before:")
 print(age_missing_before)
@@ -53,6 +85,7 @@ print(credit_missing_before)
 
 print("Credit Score Missing After:")
 print(credit_missing_after)
+
 # Standardize Gender Values
 
 print("\nUnique Gender Values Before:")
@@ -73,23 +106,39 @@ df["gender"] = df["gender"].replace({
 
 print("\nUnique Gender Values After:")
 print(df["gender"].unique())
+
 # Email Validation
 
-email_missing_before = df["email"].isnull().sum()
-
-invalid_email_mask = ~df["email"].astype(str).str.contains(
-    "@",
-    na=False
+email_missing_before = (
+    df["email"]
+    .isnull()
+    .sum()
 )
 
-invalid_emails = invalid_email_mask.sum()
+invalid_email_mask = (
+    ~df["email"]
+    .astype(str)
+    .str.contains(
+        "@",
+        na=False
+    )
+)
+
+invalid_emails = (
+    invalid_email_mask
+    .sum()
+)
 
 df.loc[
     invalid_email_mask,
     "email"
 ] = pd.NA
 
-email_missing_after = df["email"].isnull().sum()
+email_missing_after = (
+    df["email"]
+    .isnull()
+    .sum()
+)
 
 print("\nInvalid Emails Found:")
 print(invalid_emails)
@@ -99,7 +148,11 @@ print(email_missing_after)
 
 # Phone Validation
 
-phone_missing_before = df["phone"].isnull().sum()
+phone_missing_before = (
+    df["phone"]
+    .isnull()
+    .sum()
+)
 
 invalid_phone_mask = (
     df["phone"]
@@ -107,14 +160,21 @@ invalid_phone_mask = (
     .str.len() < 10
 )
 
-invalid_phones = invalid_phone_mask.sum()
+invalid_phones = (
+    invalid_phone_mask
+    .sum()
+)
 
 df.loc[
     invalid_phone_mask,
     "phone"
 ] = pd.NA
 
-phone_missing_after = df["phone"].isnull().sum()
+phone_missing_after = (
+    df["phone"]
+    .isnull()
+    .sum()
+)
 
 print("\nInvalid Phones Found:")
 print(invalid_phones)
@@ -122,16 +182,14 @@ print(invalid_phones)
 print("\nPhone Missing After Cleaning:")
 print(phone_missing_after)
 
-# Create cleaned data folder
-
-import os
+# Create Output Directory
 
 os.makedirs(
     "data/cleaned",
     exist_ok=True
 )
 
-# Save cleaned dataset
+# Save Cleaned Dataset
 
 df.to_csv(
     "data/cleaned/cleaned_data.csv",
@@ -139,6 +197,14 @@ df.to_csv(
 )
 
 print("\n✅ Cleaned dataset saved!")
+
+# Create Reports Directory
+
+os.makedirs(
+    "reports",
+    exist_ok=True
+)
+
 # Cleaning Log
 
 cleaning_log = {
@@ -148,6 +214,7 @@ cleaning_log = {
     "invalid_emails_found": int(invalid_emails),
     "invalid_phones_found": int(invalid_phones)
 }
+
 with open(
     "reports/cleaning_log.json",
     "w"

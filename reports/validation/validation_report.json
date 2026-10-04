@@ -5,5 +5,7 @@
     "invalid_transaction_amounts": 0,
     "invalid_emails": 29765,
     "invalid_phones": 29766,
+    "anomalies_detected": 5000,
+    "lof_anomalies": 5000,
     "data_health_score": 97.62
 }
